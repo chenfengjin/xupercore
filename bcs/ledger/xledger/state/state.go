@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	pb2 "github.com/xuperchain/xupercore/kernel/contract/bridge/pb"
+	"github.com/xuperchain/xupercore/kernel/evm"
 	"math/big"
 	"path/filepath"
 	"strconv"
@@ -173,6 +174,9 @@ func (t *State) SetProposalMG(proposalMgr propose.ProposeManager) {
 
 func (t *State) SetTimerTaskMG(timerTaskMgr timerTask.TimerManager) {
 	t.sctx.SetTimerTaskMG(timerTaskMgr)
+}
+func (t *State) SetEVMProy(proxy evm.EVMProxy) {
+	t.sctx.SetEVMProxy(proxy)
 }
 
 // 选择足够金额的utxo
@@ -389,7 +393,7 @@ func (t *State) Play(blockid []byte) error {
 }
 
 func (t *State) PlayForMiner(blockid []byte) error {
-	beginTime:= time.Now()
+	beginTime := time.Now()
 	timer := timer.NewXTimer()
 	batch := t.NewBatch()
 	block, blockErr := t.sctx.Ledger.QueryBlock(blockid)
