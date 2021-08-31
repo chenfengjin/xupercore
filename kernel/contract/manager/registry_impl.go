@@ -106,16 +106,11 @@ func (r *registryImpl) ListObjects() map[string]contract.KernelObject {
 	return r.objects
 }
 
-var (
-	defaultRegistry = &registryImpl{
-		mutex:     sync.Mutex{},
-		methods:   map[string]map[string]contract.KernMethod{},
-		shortcuts: map[string]shortcut{},
-		objects:   map[string]contract.KernelObject{},
-	}
-)
-
-//   第二个参数用 function
-func RegisterKernelObject(contract string, creator contract.ObjectInstanceCreator, configPath string) {
-	defaultRegistry.RegisterKernelObject(contract, creator, configPath)
-}
+// var (
+// 	defaultRegistry = &registryImpl{
+// 		mutex:     sync.Mutex{},
+// 		methods:   map[string]map[string]contract.KernMethod{},
+// 		shortcuts: map[string]shortcut{},
+// 		objects:   map[string]contract.KernelObject{},
+// 	}
+// )

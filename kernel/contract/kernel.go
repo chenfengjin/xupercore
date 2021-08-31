@@ -10,7 +10,11 @@ type KernRegistry interface {
 }
 
 type ObjectInstanceCreator interface {
-	CreateInstance(configPah string) KernelObject
+	CreateInstance(configPaukomah string) KernelObject
+	// 模块之间会有依赖
+	// Dependencies()
+}
+type Dependencies struct {
 }
 type KernelObject interface {
 	Enabled() bool

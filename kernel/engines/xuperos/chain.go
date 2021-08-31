@@ -371,6 +371,7 @@ func (t *Chain) initChainCtx() error {
 		t.log.Error("create contract manager error", "bcName", t.ctx.BCName, "err", err)
 		return fmt.Errorf("create contract manager error")
 	}
+	contractObj.GetKernRegistry()
 	t.ctx.Contract = contractObj
 	// 设置合约manager到状态机
 	t.ctx.State.SetContractMG(t.ctx.Contract)
@@ -429,12 +430,9 @@ func (t *Chain) initChainCtx() error {
 	t.ctx.State.SetTimerTaskMG(t.ctx.TimerTask)
 	t.log.Trace("create timer_task succ", "bcName", t.ctx.BCName)
 	t.log.Trace("create chain succ", "bcName", t.ctx.BCName)
-	// 11. EVM Proxy
-	_, err = t.relyAgent.CreateEVManager()
-	if err != nil {
-		t.log.Error("create evm proxy failed", "bcname", t.ctx.BCName, "err", err)
-		return fmt.Errorf("create evm proxy error")
-	}
+
+	//  初始化预编译合约
+
 	return nil
 }
 
