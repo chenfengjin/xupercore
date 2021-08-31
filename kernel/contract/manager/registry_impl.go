@@ -17,7 +17,7 @@ type registryImpl struct {
 	mutex     sync.Mutex
 	methods   map[string]map[string]contract.KernMethod
 	shortcuts map[string]shortcut
-	objects   map[string]contract.KernelObject
+	objects   map[string]contract.PrecompiledContract
 }
 
 func NewRegisry() *registryImpl {
@@ -25,7 +25,7 @@ func NewRegisry() *registryImpl {
 		mutex:     sync.Mutex{},
 		methods:   map[string]map[string]contract.KernMethod{},
 		shortcuts: map[string]shortcut{},
-		objects:   map[string]contract.KernelObject{},
+		objects:   map[string]contract.PrecompiledContract{},
 	}
 }
 
@@ -102,7 +102,7 @@ func (r *registryImpl) GetKernMethod(ctract, method string) (contract.KernMethod
 	return contractMethod, nil
 }
 
-func (r *registryImpl) ListObjects() map[string]contract.KernelObject {
+func (r *registryImpl) ListObjects() map[string]contract.PrecompiledContract {
 	return r.objects
 }
 
@@ -111,6 +111,6 @@ func (r *registryImpl) ListObjects() map[string]contract.KernelObject {
 // 		mutex:     sync.Mutex{},
 // 		methods:   map[string]map[string]contract.KernMethod{},
 // 		shortcuts: map[string]shortcut{},
-// 		objects:   map[string]contract.KernelObject{},
+// 		objects:   map[string]contract.PrecompiledContract{},
 // 	}
 // )

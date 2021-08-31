@@ -10,7 +10,6 @@ import (
 	"github.com/hyperledger/burrow/txs/payload"
 
 	"github.com/xuperchain/xupercore/bcs/contract/evm"
-	"github.com/xuperchain/xupercore/kernel/contract/manager"
 	"github.com/xuperchain/xupercore/kernel/contract/sandbox"
 
 	"github.com/hyperledger/burrow/crypto"
@@ -60,7 +59,7 @@ func (c *EVMProxy) Enabled() bool {
 	return false
 }
 
-func (c *EVMProxyInstaceCreator) CreateInstance(configPah string) contract.KernelObject {
+func (c *EVMProxyInstaceCreator) CreateInstance(configPah string) contract.PrecompiledContract {
 	return &EVMProxy{}
 }
 
@@ -282,7 +281,10 @@ func (p *EVMProxy) transactionCount(ctx contract.KContext) (*contract.Response, 
 
 func (p *EVMProxy) pledge(ctx contract.KContext) (*contract.Response, error) {
 	//  这里用十进制还是十六进制呢
-	amount, _ := new(big.Int).SetString(ctx.TransferAmount(), 10)
+	amount, err := ctx.TransferAmount()
+	if err != nil {
+		return nil, err
+	}
 	to := ctx.Args()["to"]
 	toByte, err := hex.DecodeString(string(to))
 	if err != nil {
@@ -332,7 +334,10 @@ func (p *EVMProxy) allowance(ctx contract.KContext) (*contract.Response, error) 
 		Body:   balance,
 	}, nil
 }
+func newEVMProxyInstaceCreator() contract.ObjectInstanceCreator {
+	return &EVMProxyInstaceCreator{}
+}
 
 func init() {
-	manager.RegisterKernelObject("$evm", &EVMProxyInstaceCreator{}, "")
+	contract.RegisterKernelObject("$evm", newEVMProxyInstaceCreator, "")
 }
