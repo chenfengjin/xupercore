@@ -17,6 +17,16 @@ type registryImpl struct {
 	mutex     sync.Mutex
 	methods   map[string]map[string]contract.KernMethod
 	shortcuts map[string]shortcut
+	objects   map[string]contract.KernelObject
+}
+
+func NewRegisry() *registryImpl {
+	return &registryImpl{
+		mutex:     sync.Mutex{},
+		methods:   map[string]map[string]contract.KernMethod{},
+		shortcuts: map[string]shortcut{},
+		objects:   map[string]contract.KernelObject{},
+	}
 }
 
 func (r *registryImpl) RegisterKernMethod(ctract, method string, handler contract.KernMethod) {
@@ -41,6 +51,7 @@ func (r *registryImpl) RegisterKernMethod(ctract, method string, handler contrac
 func (r *registryImpl) RegisterShortcut(oldmethod, contract, method string) {
 	r.mutex.Lock()
 	defer r.mutex.Unlock()
+	//  why not raii
 	if r.shortcuts == nil {
 		r.shortcuts = make(map[string]shortcut)
 	}
@@ -53,6 +64,13 @@ func (r *registryImpl) RegisterShortcut(oldmethod, contract, method string) {
 		Contract:  contract,
 		Method:    method,
 	}
+}
+
+func (r *registryImpl) RegisterKernelObject(contract string, creator contract.ObjectInstanceCreator, configPath string) {
+	//  限制配置文件必须和 contract 一致，避免不同 Object 相同的config 配置
+	instance := creator.CreateInstance("instance" + ".yaml")
+	r.objects[contract] = instance
+
 }
 
 func (r *registryImpl) getShortcut(method string) (shortcut, error) {
@@ -82,4 +100,22 @@ func (r *registryImpl) GetKernMethod(ctract, method string) (contract.KernMethod
 		return nil, fmt.Errorf("kernel method '%s' for '%s' not exists", method, ctract)
 	}
 	return contractMethod, nil
+}
+
+func (r *registryImpl) ListObjects() map[string]contract.KernelObject {
+	return r.objects
+}
+
+var (
+	defaultRegistry = &registryImpl{
+		mutex:     sync.Mutex{},
+		methods:   map[string]map[string]contract.KernMethod{},
+		shortcuts: map[string]shortcut{},
+		objects:   map[string]contract.KernelObject{},
+	}
+)
+
+//   第二个参数用 function
+func RegisterKernelObject(contract string, creator contract.ObjectInstanceCreator, configPath string) {
+	defaultRegistry.RegisterKernelObject(contract, creator, configPath)
 }

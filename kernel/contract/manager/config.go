@@ -25,3 +25,11 @@ func loadConfig(fname string) (*contract.ContractConfig, error) {
 	}
 	return cfg, nil
 }
+
+type EVMProxyConfig struct {
+	Enable bool
+}
+
+func loadEVMProxyConfig(fname string) (*EVMProxyConfig, error) {
+	return &EVMProxyConfig{}, nil
+}

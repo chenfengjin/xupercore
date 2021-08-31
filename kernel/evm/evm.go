@@ -10,6 +10,7 @@ import (
 	"github.com/hyperledger/burrow/txs/payload"
 
 	"github.com/xuperchain/xupercore/bcs/contract/evm"
+	"github.com/xuperchain/xupercore/kernel/contract/manager"
 	"github.com/xuperchain/xupercore/kernel/contract/sandbox"
 
 	"github.com/hyperledger/burrow/crypto"
@@ -36,12 +37,13 @@ var (
 	errNotImplemented = errors.New("not implemented")
 )
 
-type EVMProxy interface {
-}
-
-func NewEVMProxy(manager contract.Manager) (*proxy, error) {
+// type EVMProxy interface {
+// }
+//
+// type EVMProxy *EVMProxy
+func NewEVMProxy(manager contract.Manager) (*EVMProxy, error) {
 	registry := manager.GetKernRegistry()
-	p := proxy{}
+	p := EVMProxy{}
 	registry.RegisterKernMethod(CONTRACT_EVM, "SendRawTransaction", p.sendRawTransaction)
 	registry.RegisterKernMethod(CONTRACT_EVM, "GetTransactionReceipt", p.getTransactionReceipt)
 	registry.RegisterKernMethod(CONTRACT_EVM, "BalanceOf", p.balanceOf)
@@ -54,10 +56,21 @@ func NewEVMProxy(manager contract.Manager) (*proxy, error) {
 	return &p, nil
 }
 
-type proxy struct {
+type EVMProxyInstaceCreator struct {
 }
 
-func (p *proxy) sendRawTransaction(ctx contract.KContext) (*contract.Response, error) {
+func (c *EVMProxy) Enabled() bool {
+	return false
+}
+
+func (c *EVMProxyInstaceCreator) CreateInstance(configPah string) contract.KernelObject {
+	return &EVMProxy{}
+}
+
+type EVMProxy struct {
+}
+
+func (p *EVMProxy) sendRawTransaction(ctx contract.KContext) (*contract.Response, error) {
 	args := ctx.Args()
 	signedTx := args["signed_tx"]
 	data, err := x.DecodeToBytes(string(signedTx))
@@ -141,7 +154,7 @@ func (p *proxy) sendRawTransaction(ctx contract.KContext) (*contract.Response, e
 	resp, err = ctx.Call("evm", contractName, "", invokArgs)
 	return resp, err
 }
-func (p *proxy) TxHash(from crypto.Address, chainId string, rawTx *rpc.RawTx, amount *big.Int) ([]byte, error) {
+func (p *EVMProxy) TxHash(from crypto.Address, chainId string, rawTx *rpc.RawTx, amount *big.Int) ([]byte, error) {
 	to, err := crypto.AddressFromBytes(rawTx.To)
 	if err != nil {
 		return nil, err
@@ -166,7 +179,7 @@ func (p *proxy) TxHash(from crypto.Address, chainId string, rawTx *rpc.RawTx, am
 	return tx.Hash(), nil
 }
 
-func (p *proxy) verifySignature(
+func (p *EVMProxy) verifySignature(
 	nonce, gasPrice, gasLimit uint64,
 	to, value, data []byte,
 	net, V uint64,
@@ -191,7 +204,7 @@ func (p *proxy) verifySignature(
 	}
 	return nil
 }
-func (p *proxy) getTransactionReceipt(ctx contract.KContext) (*contract.Response, error) {
+func (p *EVMProxy) getTransactionReceipt(ctx contract.KContext) (*contract.Response, error) {
 	args := ctx.Args()
 	txHash := args["tx_hash"]
 	txHashByte, err := hex.DecodeString(string(txHash))
@@ -208,7 +221,7 @@ func (p *proxy) getTransactionReceipt(ctx contract.KContext) (*contract.Response
 	}, nil
 }
 
-func (p *proxy) transfer(ctx contract.KContext, from, to []byte, amount *big.Int) error {
+func (p *EVMProxy) transfer(ctx contract.KContext, from, to []byte, amount *big.Int) error {
 	if new(big.Int).SetBytes(from).Cmp(new(big.Int)) != 0 {
 		fromBalanceByte, err := ctx.Get(BALANCE_PREFIX, from)
 		if err != nil {
@@ -242,7 +255,7 @@ func (p *proxy) transfer(ctx contract.KContext, from, to []byte, amount *big.Int
 	return nil
 }
 
-func (p *proxy) balanceOf(ctx contract.KContext) (*contract.Response, error) {
+func (p *EVMProxy) balanceOf(ctx contract.KContext) (*contract.Response, error) {
 	address := ctx.Args()["address"]
 	addrss1, err := hex.DecodeString(string(address))
 	if err != nil {
@@ -255,7 +268,7 @@ func (p *proxy) balanceOf(ctx contract.KContext) (*contract.Response, error) {
 	return &contract.Response{Body: balance}, nil
 }
 
-func (p *proxy) transactionCount(ctx contract.KContext) (*contract.Response, error) {
+func (p *EVMProxy) transactionCount(ctx contract.KContext) (*contract.Response, error) {
 	count, err := ctx.Get(STATUS, []byte(TRANSACTION_COUNT))
 	if err != nil {
 		if err != sandbox.ErrNotFound {
@@ -269,7 +282,7 @@ func (p *proxy) transactionCount(ctx contract.KContext) (*contract.Response, err
 	}, nil
 }
 
-func (p *proxy) pledge(ctx contract.KContext) (*contract.Response, error) {
+func (p *EVMProxy) pledge(ctx contract.KContext) (*contract.Response, error) {
 	//  这里用十进制还是十六进制呢
 	amount, _ := new(big.Int).SetString(ctx.TransferAmount(), 10)
 	to := ctx.Args()["to"]
@@ -291,7 +304,7 @@ func (p *proxy) pledge(ctx contract.KContext) (*contract.Response, error) {
 }
 
 //  赎回
-func (p *proxy) redeem(ctx contract.KContext) (*contract.Response, error) {
+func (p *EVMProxy) redeem(ctx contract.KContext) (*contract.Response, error) {
 	initiator := ctx.Initiator()
 	to, err := ctx.Get(PLEDGE_PREFIX, []byte(initiator))
 	if err != nil {
@@ -311,7 +324,7 @@ func (p *proxy) redeem(ctx contract.KContext) (*contract.Response, error) {
 }
 
 //  质压额度
-func (p *proxy) allowance(ctx contract.KContext) (*contract.Response, error) {
+func (p *EVMProxy) allowance(ctx contract.KContext) (*contract.Response, error) {
 	balance, err := ctx.Get(PLEDGE_PREFIX, []byte(ctx.Initiator()))
 	if err != nil {
 		return nil, err
@@ -320,4 +333,8 @@ func (p *proxy) allowance(ctx contract.KContext) (*contract.Response, error) {
 		Status: contract.StatusOK,
 		Body:   balance,
 	}, nil
+}
+
+func init() {
+	manager.RegisterKernelObject("$evm", &EVMProxyInstaceCreator{}, "")
 }

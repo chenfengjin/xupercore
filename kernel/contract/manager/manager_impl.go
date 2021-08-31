@@ -3,8 +3,9 @@ package manager
 import (
 	"errors"
 	"fmt"
-	"github.com/xuperchain/xupercore/lib/logs"
 	"path/filepath"
+
+	"github.com/xuperchain/xupercore/lib/logs"
 
 	"github.com/xuperchain/xupercore/kernel/contract"
 	"github.com/xuperchain/xupercore/kernel/contract/bridge"
@@ -13,9 +14,11 @@ import (
 )
 
 type managerImpl struct {
-	core      contract.ChainCore
-	xbridge   *bridge.XBridge
-	kregistry registryImpl
+	core    contract.ChainCore
+	xbridge *bridge.XBridge
+	// kernel registry
+	kregistry *registryImpl
+	// Precompiled Registry
 }
 
 func newManagerImpl(cfg *contract.ManagerConfig) (contract.Manager, error) {
@@ -52,6 +55,7 @@ func newManagerImpl(cfg *contract.ManagerConfig) (contract.Manager, error) {
 	if cfg.Config != nil {
 		logDriver = cfg.Config.LogDriver
 	}
+	registry := NewRegisry()
 	xbridge, err := bridge.New(&bridge.XBridgeConfig{
 		Basedir: cfg.Basedir,
 		VMConfigs: map[bridge.ContractType]bridge.VMConfig{
@@ -61,7 +65,7 @@ func newManagerImpl(cfg *contract.ManagerConfig) (contract.Manager, error) {
 			bridge.TypeKernel: &contract.XkernelConfig{
 				Driver:   xcfg.Xkernel.Driver,
 				Enable:   xcfg.Xkernel.Enable,
-				Registry: &m.kregistry,
+				Registry: registry,
 			},
 		},
 		Config:    *xcfg,
@@ -73,11 +77,45 @@ func newManagerImpl(cfg *contract.ManagerConfig) (contract.Manager, error) {
 		return nil, err
 	}
 	m.xbridge = xbridge
-	registry := &m.kregistry
+	m.kregistry = registry
+	//  Contract Manage
 	registry.RegisterKernMethod("$contract", "deployContract", m.deployContract)
 	registry.RegisterKernMethod("$contract", "upgradeContract", m.upgradeContract)
 	registry.RegisterShortcut("Deploy", "$contract", "deployContract")
 	registry.RegisterShortcut("Upgrade", "$contract", "upgradeContract")
+
+	for _, object := range registry.ListObjects() {
+		if object.Enabled() {
+			// 注册信息
+			// a:=reflect.ValueOf(object)
+			// contractv := reflect.ValueOf(contract)
+			// methodv := contractv.MethodByName(strings.Title(methodName))
+			// if !methodv.IsValid() {
+			// 	resp = code.Errors("bad method " + methodName)
+			// 	ctx.SetOutput(&resp)
+			// 	return
+			// }
+			// method, ok := methodv.Interface().(func(code.Context) code.Response)
+			// if !ok {
+			// 	resp = code.Errors("bad method type " + methodName)
+			// 	ctx.SetOutput(&resp)
+			// 	return
+			// }
+			// resp = method(ctx)
+		}
+	}
+
+	// TODO
+	// ecfg, err := loadEVMProxyConfig(cfg.EnvConf.GenConfFilePath("evmProxy.yml"))
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// if ecfg.Enable {
+	// creator := new(evm.EVMProxyInstaceCreator)
+	// registry.RegisterKernelObject(evm.CONTRACT_EVM, creator, "ecfg")
+	// }
+
 	return m, nil
 }
 
@@ -90,7 +128,7 @@ func (m *managerImpl) NewStateSandbox(cfg *contract.SandboxConfig) (contract.Sta
 }
 
 func (m *managerImpl) GetKernRegistry() contract.KernRegistry {
-	return &m.kregistry
+	return m.kregistry
 }
 
 func (m *managerImpl) deployContract(ctx contract.KContext) (*contract.Response, error) {
