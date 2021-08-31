@@ -65,6 +65,7 @@ func (c *EVMProxyInstaceCreator) CreateInstance(configPah string) contract.Kerne
 }
 
 type EVMProxy struct {
+	PledgeRate uint64
 }
 
 func (p *EVMProxy) sendRawTransaction(ctx contract.KContext) (*contract.Response, error) {

@@ -32,6 +32,7 @@ var (
 	}
 )
 
+// use defaultRegistry to keep global clean
 func RegisterKernelObject(contract string, creator contract.ObjectInstanceCreator, configPath string) {
 	defaultRegistry.RegisterKernelObject(contract, creator, configPath)
 }
