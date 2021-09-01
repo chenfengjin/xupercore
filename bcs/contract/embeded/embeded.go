@@ -28,7 +28,7 @@ func (k *embededVM) RemoveCache(name string) {
 
 type embededInstance struct {
 	ctx      *bridge.Context
-	kctx     *embededContextImpl
+	kctx     *Context
 	registry contract.KernRegistry
 }
 

@@ -12,7 +12,7 @@ import (
 	"github.com/xuperchain/xupercore/protos"
 )
 
-type kcontextImpl struct {
+type Context struct {
 	ctx     *bridge.Context
 	syscall *bridge.SyscallService
 	contract.StateSandbox
@@ -20,8 +20,8 @@ type kcontextImpl struct {
 	used, limit contract.Limits
 }
 
-func newKContext(ctx *bridge.Context, syscall *bridge.SyscallService) *kcontextImpl {
-	return &kcontextImpl{
+func newKContext(ctx *bridge.Context, syscall *bridge.SyscallService) *Context {
+	return &Context{
 		ctx:          ctx,
 		syscall:      syscall,
 		limit:        ctx.ResourceLimits,
@@ -31,31 +31,31 @@ func newKContext(ctx *bridge.Context, syscall *bridge.SyscallService) *kcontextI
 }
 
 // 交易相关数据
-func (k *kcontextImpl) Args() map[string][]byte {
+func (k *Context) Args() map[string][]byte {
 	return k.ctx.Args
 }
 
-func (k *kcontextImpl) Initiator() string {
+func (k *Context) Initiator() string {
 	return k.ctx.Initiator
 }
 
-func (k *kcontextImpl) Caller() string {
+func (k *Context) Caller() string {
 	return k.ctx.Caller
 }
 
-func (k *kcontextImpl) AuthRequire() []string {
+func (k *Context) AuthRequire() []string {
 	return k.ctx.AuthRequire
 }
 
-func (k *kcontextImpl) AddResourceUsed(delta contract.Limits) {
+func (k *Context) AddResourceUsed(delta contract.Limits) {
 	k.used.Add(delta)
 }
 
-func (k *kcontextImpl) ResourceLimit() contract.Limits {
+func (k *Context) ResourceLimit() contract.Limits {
 	return k.limit
 }
 
-func (k *kcontextImpl) Call(module, contractName, method string, args map[string][]byte) (*contract.Response, error) {
+func (k *Context) Call(module, contractName, method string, args map[string][]byte) (*contract.Response, error) {
 	var argPairs []*pb.ArgPair
 	for k, v := range args {
 		argPairs = append(argPairs, &pb.ArgPair{
@@ -84,7 +84,7 @@ func (k *kcontextImpl) Call(module, contractName, method string, args map[string
 }
 
 // EmitAsyncTask 异步发送订阅事件
-func (k *kcontextImpl) EmitAsyncTask(event string, args interface{}) (err error) {
+func (k *Context) EmitAsyncTask(event string, args interface{}) (err error) {
 	var rawBytes []byte
 	// 见asyncworker.TaskContextImpl, Unmarshal函数对应为json.Unmarshal
 	rawBytes, err = json.Marshal(args)
@@ -100,7 +100,7 @@ func (k *kcontextImpl) EmitAsyncTask(event string, args interface{}) (err error)
 	return
 }
 
-func (k *kcontextImpl) TransferAmount() (*big.Int, error) {
+func (k *Context) TransferAmount() (*big.Int, error) {
 	amount, ok := new(big.Int).SetString(k.ctx.TransferAmount, 10)
 	if !ok {
 		return nil, fmt.Errorf("can not convert %s to big int with base 10", k.ctx.TransferAmount)
@@ -109,6 +109,6 @@ func (k *kcontextImpl) TransferAmount() (*big.Int, error) {
 	return amount, nil
 }
 
-func (k *kcontextImpl) ContractName() string {
+func (k *Context) ContractName() string {
 	return k.ctx.ContractName
 }
