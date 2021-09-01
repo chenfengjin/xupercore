@@ -64,7 +64,7 @@ func New(cfg *XBridgeConfig) (*XBridge, error) {
 }
 
 func (v *XBridge) initVM() error {
-	types := []ContractType{TypeWasm, TypeNative, TypeEvm, TypeKernel}
+	types := []ContractType{TypeWasm, TypeNative, TypeEvm, TypeKernel, TypeEmbeded}
 	for _, tp := range types {
 		vmconfig, ok := v.vmconfigs[tp]
 		if !ok {

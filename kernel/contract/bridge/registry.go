@@ -8,10 +8,11 @@ import (
 type ContractType string
 
 const (
-	TypeWasm   ContractType = "wasm"
-	TypeNative ContractType = "native"
-	TypeEvm    ContractType = "evm"
-	TypeKernel ContractType = "xkernel"
+	TypeWasm    ContractType = "wasm"
+	TypeNative  ContractType = "native"
+	TypeEvm     ContractType = "evm"
+	TypeKernel  ContractType = "xkernel"
+	TypeEmbeded ContractType = "embeded"
 )
 
 var defaultRegistry = newRegistry()

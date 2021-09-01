@@ -18,6 +18,8 @@ type managerImpl struct {
 	xbridge *bridge.XBridge
 	// kernel registry
 	kregistry *registryImpl
+
+	// embededRegistry *registryImpl
 	// Precompiled Registry
 }
 
@@ -67,6 +69,10 @@ func newManagerImpl(cfg *contract.ManagerConfig) (contract.Manager, error) {
 				Enable:   xcfg.Xkernel.Enable,
 				Registry: registry,
 			},
+			bridge.TypeEmbeded: &contract.EmbededConfig{
+				Enable:   false,
+				Registry: nil,
+			}
 		},
 		Config:    *xcfg,
 		XModel:    cfg.XMReader,
@@ -84,26 +90,45 @@ func newManagerImpl(cfg *contract.ManagerConfig) (contract.Manager, error) {
 	registry.RegisterShortcut("Deploy", "$contract", "deployContract")
 	registry.RegisterShortcut("Upgrade", "$contract", "upgradeContract")
 
-	for _, object := range registry.ListObjects() {
-		if object.Enabled() {
-			// 注册信息
-			// a:=reflect.ValueOf(object)
-			// contractv := reflect.ValueOf(contract)
-			// methodv := contractv.MethodByName(strings.Title(methodName))
-			// if !methodv.IsValid() {
-			// 	resp = code.Errors("bad method " + methodName)
-			// 	ctx.SetOutput(&resp)
-			// 	return
-			// }
-			// method, ok := methodv.Interface().(func(code.Context) code.Response)
-			// if !ok {
-			// 	resp = code.Errors("bad method type " + methodName)
-			// 	ctx.SetOutput(&resp)
-			// 	return
-			// }
-			// resp = method(ctx)
+	// precocfg.EnvConf.PrecompiledConf
+	var PreCompiledConfig contract.PreCompiledConf
+
+	for name, config := range PreCompiledConfig {
+		f, ok := contract.GetEmbededContractCretorFunc(name)
+		if !ok {
+			// TODO
 		}
+		_ = config
+		// contract := f(config)
+		// for method,KernelMethod:=range KernelMethodOfContract {
+		// 	registry.RegisterKernMethod(name,method,KernelMethod)
+		// }
+
 	}
+	// }
+	//
+	//
+	// 	config,ok:=PreCompiledConfig[name]
+	// 	if !ok{
+	// 		// 默认禁用该模块
+	// 		continue
+	// 	}			// 注册信息
+	// a:=reflect.ValueOf(object)
+	// contractv := reflect.ValueOf(contract)
+	// methodv := contractv.MethodByName(strings.Title(methodName))
+	// if !methodv.IsValid() {
+	// 	resp = code.Errors("bad method " + methodName)
+	// 	ctx.SetOutput(&resp)
+	// 	return
+	// }
+	// method, ok := methodv.Interface().(func(code.Context) code.Response)
+	// if !ok {
+	// 	resp = code.Errors("bad method type " + methodName)
+	// 	ctx.SetOutput(&resp)
+	// 	return
+	// }
+	// resp = method(ctx)
+	// }
 
 	// TODO
 	// ecfg, err := loadEVMProxyConfig(cfg.EnvConf.GenConfFilePath("evmProxy.yml"))
@@ -113,7 +138,7 @@ func newManagerImpl(cfg *contract.ManagerConfig) (contract.Manager, error) {
 
 	// if ecfg.Enable {
 	// creator := new(evm.EVMProxyInstaceCreator)
-	// registry.RegisterKernelObject(evm.CONTRACT_EVM, creator, "ecfg")
+	// registry.RegisterEmbededCreatorFunc(evm.CONTRACT_EVM, creator, "ecfg")
 	// }
 
 	return m, nil

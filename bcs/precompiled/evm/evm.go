@@ -52,6 +52,7 @@ var (
 // }
 
 type EVMProxyInstaceCreator struct {
+	config map[string]string
 }
 
 func (c *EVMProxy) Enabled() bool {
@@ -64,6 +65,7 @@ func (c *EVMProxyInstaceCreator) CreateInstance(configPah string) contract.Preco
 }
 
 type EVMProxy struct {
+	config     map[string]string
 	PledgeRate uint64
 }
 
@@ -334,10 +336,12 @@ func (p *EVMProxy) allowance(ctx contract.KContext) (*contract.Response, error) 
 		Body:   balance,
 	}, nil
 }
-func newEVMProxyInstaceCreator() contract.ObjectInstanceCreator {
-	return &EVMProxyInstaceCreator{}
+func newEVMProxyInstaceCreator(config map[string]string) contract.EmbededContract {
+	return EVMProxy{
+		config: config,
+	}
 }
 
 func init() {
-	contract.RegisterKernelObject("$evm", newEVMProxyInstaceCreator, "")
+	contract.RegisterEmbededContractCreatorFunc("ethproxy", newEVMProxyInstaceCreator)
 }

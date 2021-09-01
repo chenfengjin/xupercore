@@ -62,7 +62,7 @@ func (c *EVMProxy) Enabled() bool {
 	return false
 }
 
-func (c *EVMProxyInstaceCreator) CreateInstance(configPah string) contract.PrecompiledContract {
+func (c *EVMProxyInstaceCreator) CreateInstance(configPah string) contract.EmbededContract {
 	return &EVMProxy{}
 }
 
