@@ -6,6 +6,10 @@ import (
 	"sync"
 )
 
+var (
+	typeEmbededContract = reflect.TypeOf(new(EmbededContract)).Elem()
+)
+
 type EmbededContractFunc func(KContext) (Response, error)
 type EmbededContractRegistry interface {
 	RegisterEmbededCreatorFunc(contract string, f EmbededContractCreator, configPath string)
@@ -15,7 +19,6 @@ type EmbededContractRegistry interface {
 // type EmbededContractCreator func(...interface{}) EmbededContract
 type EmbededContractCreator interface{}
 
-//  TODO
 // type EmbededContractCreator interface{}
 type EmbededContract interface {
 }
@@ -34,10 +37,7 @@ func (r *precompiledRegistry) registerEmbededContract(name string, f EmbededCont
 		panic("EmbededContractCreator must return and only return EmbededContract")
 	}
 	out := fv.Out(0)
-	a := new(EmbededContract)
-	b := reflect.TypeOf(a).Elem()
-	if !out.Implements(b) {
-		//  just panic as it happens at startup
+	if out != typeEmbededContract {
 		panic("EmbededContractCreator must return EmbededContract")
 	}
 

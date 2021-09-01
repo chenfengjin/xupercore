@@ -1,7 +1,6 @@
 package manager
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/xuperchain/xupercore/kernel/contract"
@@ -61,10 +60,27 @@ func TestInvoke(t *testing.T) {
 type helloContract struct {
 }
 
-func TestEmbededContract(t *testing.T) {
-	contract.RegisterEmbededContract("hi", helloContractCreator)
-	contract := contract.GetEmbededContractCretorFunc("hi")
-	t.Log(reflect.TypeOf(contract).In(0))
+func TestEmbededContractRegister(t *testing.T) {
+
+	t.Run("TestRegisterOK", func(t *testing.T) {
+		contract.RegisterEmbededContract("hi", helloContractCreator)
+		contract.GetEmbededContractCretorFunc("hi")
+	})
+	t.Run("TestRegisterFail", func(t *testing.T) {
+		defer func() {
+			if r := recover(); r == nil {
+				t.Error("expect panic, but it did not")
+			}
+		}()
+		contract.RegisterEmbededContract("failed", nullContractCretor)
+	})
+}
+
+type nullContract struct {
+}
+
+func nullContractCretor() nullContract {
+	return nullContract{}
 }
 
 type helloContractConfig struct {
