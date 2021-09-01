@@ -1,6 +1,7 @@
 package manager
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/xuperchain/xupercore/kernel/contract"
@@ -60,6 +61,18 @@ func TestInvoke(t *testing.T) {
 type helloContract struct {
 }
 
+func TestEmbededContract(t *testing.T) {
+	contract.RegisterEmbededContract("hi", helloContractCreator)
+	contract := contract.GetEmbededContractCretorFunc("hi")
+	t.Log(reflect.TypeOf(contract).In(0))
+}
+
+type helloContractConfig struct {
+}
+
+func helloContractCreator(config helloContractConfig) contract.EmbededContract {
+	return helloContract{}
+}
 func (h *helloContract) Hi(ctx contract.KContext) (*contract.Response, error) {
 	name := ctx.Args()["name"]
 	ctx.Put("test", []byte("k1"), []byte("v1"))
@@ -67,3 +80,61 @@ func (h *helloContract) Hi(ctx contract.KContext) (*contract.Response, error) {
 		Body: []byte("hello " + string(name)),
 	}, nil
 }
+
+// type InstanceCreator interface {
+// 	CreateInstance(...interface{})
+// }
+// type B struct {
+// }
+//
+// func A(creator InstanceCreator) {
+//
+// }
+//
+// func (b *B) CreateInstance() {
+
+// }
+// func TestC(t *testing.T) {
+// 	A(&B{})
+// }
+
+// type A struct {
+// 	Name string
+// }
+//
+// func TestReflect(t *testing.T) {
+// 	reflectNew((*A)(nil))
+// }
+//
+// //反射创建新对象。
+// func reflectNew(target interface{}) {
+// 	// orig := new(Employee)
+// 	//
+// 	// t := reflect.TypeOf(orig)
+// 	// v := reflect.New(t.Elem())
+// 	//
+// 	// reflected pointer
+// 	// newP := v.Interface()
+// 	//
+// 	// Unmarshal to reflected struct pointer
+// 	// json.Unmarshal([]byte("{\"firstname\": \"bender\"}"), newP)
+// 	//
+// 	// fmt.Printf("%+v\n", newP)
+//
+// 	// if target == nil {
+// 	// 	// fmt.Println("参数不能未空")
+// 	// 	return
+// 	// }
+// 	//
+// 	// t := reflect.TypeOf(target)
+// 	// if t.Kind() == reflect.Ptr { //指针类型获取真正type需要调用Elem
+// 	// 	t = t.Elem()
+// 	// }
+// 	//
+// 	// newStruc := reflect.New(t)                            // 调用反射创建对象
+// 	// newStruc.Elem().FieldByName("Name").SetString("Lily") //设置值
+// 	//
+// 	// newVal := newStruc.Elem().FieldByName("Name") //获取值
+// 	//
+// 	// fmt.Println(newVal.String())
+// }

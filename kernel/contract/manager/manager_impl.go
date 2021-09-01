@@ -3,6 +3,8 @@ package manager
 import (
 	"errors"
 	"fmt"
+	"reflect"
+
 	"github.com/xuperchain/xupercore/lib/logs"
 	"path/filepath"
 
@@ -52,6 +54,38 @@ func newManagerImpl(cfg *contract.ManagerConfig) (contract.Manager, error) {
 	if cfg.Config != nil {
 		logDriver = cfg.Config.LogDriver
 	}
+	//  注册 embeded 合约
+	// var embededRegistry contract.EmbededContractRegistry
+	for name, embededContract := range xcfg.Embeded.Contracts {
+		if !embededContract.Enable {
+			continue
+		}
+
+		f := contract.GetEmbededContractCretorFunc(name)
+		if f == nil {
+			return nil, fmt.Errorf("embeded contract %s is not registered", name)
+		}
+		fmt.Println(reflect.TypeOf(f))
+		// a := reflect.TypeOf(f)
+		// a.NumIn()
+		// t := a.In(0)
+		// make
+		// count := 0
+		// instance := f(embededContract.Config)
+		// contractv := reflect.ValueOf(instance)
+		// for i := 0; i < contractv.NumField(); i++ {
+		// 	field := contractv.FieldByIndex([]int{i})
+		// 	if method, ok := field.Interface().(contract.EmbededContractFunc); ok {
+		// 		embededRegistry.RegisterEmbededContractFunc(name, method)
+		// 		count++
+		// 	}
+		// }
+		// 	 TODO @chenfengjin
+		// 	  1. 更加鲁棒完备的合约校验方案
+		//    2. 把校验放到 RegisterContract
+
+	}
+
 	xbridge, err := bridge.New(&bridge.XBridgeConfig{
 		Basedir: cfg.Basedir,
 		VMConfigs: map[bridge.ContractType]bridge.VMConfig{
@@ -63,6 +97,7 @@ func newManagerImpl(cfg *contract.ManagerConfig) (contract.Manager, error) {
 				Enable:   xcfg.Xkernel.Enable,
 				Registry: &m.kregistry,
 			},
+			bridge.TypeEmbeded: &xcfg.Embeded,
 		},
 		Config:    *xcfg,
 		XModel:    cfg.XMReader,
@@ -78,6 +113,8 @@ func newManagerImpl(cfg *contract.ManagerConfig) (contract.Manager, error) {
 	registry.RegisterKernMethod("$contract", "upgradeContract", m.upgradeContract)
 	registry.RegisterShortcut("Deploy", "$contract", "deployContract")
 	registry.RegisterShortcut("Upgrade", "$contract", "upgradeContract")
+	// 注册 embeded 函数
+
 	return m, nil
 }
 

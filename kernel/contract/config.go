@@ -84,6 +84,26 @@ func (x *XkernelConfig) IsEnable() bool {
 	return x.Enable
 }
 
+type EmbededContractConfig struct {
+	Enable bool
+	Config map[string]interface{}
+}
+
+type EmbededConfig struct {
+	Enable    bool
+	Driver    string
+	Registry  EmbededContractRegistry
+	Contracts map[string]EmbededContractConfig
+}
+
+func (c *EmbededConfig) IsEnable() bool {
+	return c.Enable
+}
+
+func (c *EmbededConfig) DriverName() string {
+	return c.Driver
+}
+
 // LogConfig is the log config of node
 type LogConfig struct {
 	Module         string `yaml:"module,omitempty"`
@@ -107,6 +127,7 @@ type ContractConfig struct {
 	Wasm    WasmConfig
 	Xkernel XkernelConfig
 	EVM     EVMConfig
+	Embeded EmbededConfig
 }
 
 func DefaultContractConfig() *ContractConfig {
