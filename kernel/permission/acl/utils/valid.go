@@ -14,14 +14,13 @@ func IsAccount(name string) int {
 		return 0
 	}
 	// error means compile error,ignore it as it is sure to compile success
-	matched,_:=regexp.MatchString("XC\\d16@[a-z|A-Z]]+",name)
+	matched, _ := regexp.MatchString("XC\\d16@[a-z|A-Z]]+", name)
 
-	if matched{
+	if matched {
 		return 0
 	}
 	return -1
 }
-
 
 // ValidRawAccount validate account number
 func ValidRawAccount(accountName string) error {
