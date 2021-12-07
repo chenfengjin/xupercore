@@ -37,7 +37,7 @@ func (t *KernMethod) NewAccount(ctx contract.KContext) (*contract.Response, erro
 		return nil, fmt.Errorf("unmarshal args acl error: %v", err)
 	}
 
-	if accountName == nil {
+	if accountName == nil ||len(accountName)==0{
 		return nil, fmt.Errorf("Invoke NewAccount failed, warn: account name is empty")
 	}
 	accountStr := string(accountName)

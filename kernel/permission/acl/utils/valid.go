@@ -1,7 +1,8 @@
 package utils
 
 import (
-	"fmt"
+	"errors"
+	"regexp"
 	"strings"
 )
 
@@ -12,30 +13,21 @@ func IsAccount(name string) int {
 	if !strings.HasPrefix(name, GetAccountPrefix()) {
 		return 0
 	}
-	prefix := strings.Split(name, GetAccountBcnameSep())[0]
-	prefix = prefix[len(GetAccountPrefix()):]
-	if err := ValidRawAccount(prefix); err != nil {
+	// error means compile error,ignore it as it is sure to compile success
+	matched,_:=regexp.MatchString("XC\\d16@[a-z|A-Z]]+",name)
+
+	if matched{
 		return 0
 	}
-	return 1
+	return -1
 }
+
 
 // ValidRawAccount validate account number
 func ValidRawAccount(accountName string) error {
-	// param absence check
-	if accountName == "" {
-		return fmt.Errorf("invoke NewAccount failed, account name is empty")
-	}
-	// account naming rule check
-	if len(accountName) != GetAccountSize() {
-		return fmt.Errorf("invoke NewAccount failed, account name length expect %d, actual: %d", GetAccountSize(), len(accountName))
-	}
-	for i := 0; i < GetAccountSize(); i++ {
-		if accountName[i] >= '0' && accountName[i] <= '9' {
-			continue
-		} else {
-			return fmt.Errorf("invoke NewAccount failed, account name expect continuous %d number", GetAccountSize())
-		}
+	matched, _ := regexp.MatchString("\\d16", accountName)
+	if !matched {
+		return errors.New("invalid account")
 	}
 	return nil
 }

@@ -30,7 +30,7 @@ func (s *stateManager) GetAccount(address crypto.Address) (*acm.Account, error) 
 	}
 
 	var evmCode []byte
-	if addrType == contractNameType {
+	if addrType == typeContractName {
 		v, err := s.ctx.State.Get("contract", evmCodeKey(addr))
 		if err != nil {
 			return nil, nil
@@ -96,7 +96,7 @@ func (s *stateManager) Transfer(from, to crypto.Address, amount *big.Int) error 
 
 	// return directly when from is xchain address or contract account
 	// only transfer from a contract name works
-	if addrType == contractAccountType || addrType == xchainAddrType {
+	if addrType == typeContractAccount || addrType == typeXchainAddr {
 		return nil
 	}
 
