@@ -42,7 +42,8 @@ func newNativeCreator(cfg *bridge.InstanceCreatorConfig) (bridge.InstanceCreator
 }
 
 func (n *nativeCreator) startRpcServer(service *bridge.SyscallService) (string, error) {
-	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	// TODO
+	listener, err := net.Listen("tcp", "0.0.0.0:37102")
 	if err != nil {
 		return "", err
 	}
@@ -64,6 +65,7 @@ func (n *nativeCreator) CreateInstance(ctx *bridge.Context, cp bridge.ContractCo
 }
 
 func (n *nativeCreator) RemoveCache(name string) {
+	// TODO
 
 }
 

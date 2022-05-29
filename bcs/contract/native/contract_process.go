@@ -3,7 +3,6 @@ package native
 import (
 	"context"
 	"fmt"
-	"net"
 	"os/exec"
 	"path/filepath"
 	"strconv"
@@ -29,11 +28,13 @@ type contractProcess struct {
 	desc      *protos.WasmCodeDesc
 
 	process       Process
+	IPaddress     string
 	monitorStopch chan struct{}
 	monitorWaiter sync.WaitGroup
 	logger        log15.Logger
 
 	mutex     sync.Mutex
+	rpcAddr   string
 	rpcPort   int
 	rpcConn   *grpc.ClientConn
 	rpcClient pbrpc.NativeCodeClient
@@ -56,8 +57,8 @@ func newContractProcess(cfg *contract.NativeConfig, name, basedir, chainAddr str
 
 func (c *contractProcess) makeNativeProcess() (Process, error) {
 	envs := []string{
-		"XCHAIN_CODE_PORT=" + strconv.Itoa(c.rpcPort),
-		"XCHAIN_CHAIN_ADDR=" + c.chainAddr,
+		"XCHAIN_CODE_PORT=" + strconv.Itoa(37103),
+		"XCHAIN_CHAIN_ADDR=" + "tcp://10.12.200.56:37102",
 	}
 	startcmd, err := c.makeStartCommand()
 	if err != nil {
@@ -87,7 +88,7 @@ func (c *contractProcess) makeNativeProcess() (Process, error) {
 
 // wait the subprocess to be ready
 func (c *contractProcess) waitReply() error {
-	const waitTimeout = 2 * time.Second
+	const waitTimeout = 5 * time.Second
 	ctx, cancel := context.WithTimeout(context.TODO(), waitTimeout)
 	defer cancel()
 	for {
@@ -146,7 +147,7 @@ func (c *contractProcess) resetRpcClient() error {
 	if err != nil {
 		return err
 	}
-	conn, err := grpc.Dial(fmt.Sprintf("127.0.0.1:%d", port), grpc.WithInsecure())
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", c.IPaddress, 37103), grpc.WithInsecure())
 	if err != nil {
 		return err
 	}
@@ -168,19 +169,23 @@ func (c *contractProcess) restartProcess() error {
 }
 
 func (c *contractProcess) start(startMonitor bool) error {
-	err := c.resetRpcClient()
-	if err != nil {
-		return err
-	}
+	var err error
+
 	c.process, err = c.makeNativeProcess()
 	if err != nil {
 		return err
 	}
 
-	err = c.process.Start()
+	IPAddress, err := c.process.Start()
 	if err != nil {
 		return err
 	}
+	c.IPaddress = IPAddress
+	err = c.resetRpcClient()
+	if err != nil {
+		return err
+	}
+
 	err = c.waitReply()
 	if err != nil {
 		// 避免启动失败后产生僵尸进程
@@ -194,8 +199,8 @@ func (c *contractProcess) start(startMonitor bool) error {
 	return nil
 }
 
-func (c *contractProcess) Start() error {
-	return c.start(true)
+func (c *contractProcess) Start() (string, error) {
+	return "127.0.0.1", c.start(true)
 }
 
 func (c *contractProcess) Stop() {
@@ -225,11 +230,12 @@ func (c *contractProcess) makeStartCommand() (*exec.Cmd, error) {
 }
 
 func makeFreePort() (int, error) {
-	l, err := net.Listen("tcp", "127.0.0.1:0")
-	if err != nil {
-		return 0, err
-	}
-	addr := l.Addr().(*net.TCPAddr)
-	l.Close()
-	return addr.Port, nil
+	// l, err := net.Listen("tcp", "127.0.0.1:0")
+	// if err != nil {
+	// 	return 0, err
+	// }
+	// addr := l.Addr().(*net.TCPAddr)
+	// l.Close()
+	// return addr.Port, nil
+	return 37102, nil
 }

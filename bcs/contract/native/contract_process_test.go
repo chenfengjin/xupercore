@@ -36,7 +36,7 @@ func TestCommandNotFound(t *testing.T) {
 
 		process, err := pm.makeNativeProcess()
 
-		err = process.Start()
+		_, err = process.Start()
 		defer process.Stop(time.Second)
 		if err == nil {
 			t.Error("expect error,get nil")
@@ -76,7 +76,7 @@ func TestCommandNotFound(t *testing.T) {
 			t.Error(err)
 		}
 
-		err = process.Start()
+		_, err = process.Start()
 		if err != nil {
 			t.Error(err)
 		}

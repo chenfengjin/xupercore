@@ -27,8 +27,7 @@ const (
 // Process is the container of running contract
 type Process interface {
 	// Start 启动Native code进程
-	Start() error
-
+	Start() (string, error)
 	// Stop 停止进程，如果在超时时间内进程没有退出则强制杀死进程
 	Stop(timeout time.Duration) error
 }
@@ -41,6 +40,8 @@ type DockerProcess struct {
 	mounts   []string
 	// ports    []string
 	cfg *contract.NativeDockerConfig
+
+	IPaddress string
 
 	id string
 	log.Logger
@@ -62,10 +63,10 @@ func (d *DockerProcess) resourceConfig() (int64, int64, error) {
 }
 
 // Start implements process interface
-func (d *DockerProcess) Start() error {
+func (d *DockerProcess) Start() (string, error) {
 	client, err := getDockerClient()
 	if err != nil {
-		return err
+		return "", err
 	}
 	volumes := map[string]struct{}{}
 	for _, mount := range d.mounts {
@@ -83,7 +84,7 @@ func (d *DockerProcess) Start() error {
 
 	cpulimit, memlimit, err := d.resourceConfig()
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	binds := make([]string, len(d.mounts))
@@ -114,27 +115,39 @@ func (d *DockerProcess) Start() error {
 			User:  user,
 		},
 		HostConfig: &docker.HostConfig{
-			NetworkMode: "host",
-			AutoRemove:  true,
-			Binds:       binds,
-			CPUPeriod:   cpulimit,
-			Memory:      memlimit,
+			// NetworkMode: "host",
+			// AutoRemove: true,
+			Binds:     binds,
+			CPUPeriod: cpulimit,
+			Memory:    memlimit,
+			Runtime:   "runsc",
 			// PortBindings: portBinds,
 		},
+		// NetworkingConfig: &docker.NetworkingConfig{
+		// 	EndpointsConfig: docker.EndpointConfig,
+		// },
 	}
 	container, err := client.CreateContainer(opts)
 	if err != nil {
-		return err
+		return "", err
 	}
 	d.Info("create container success", "id", container.ID)
 	d.id = container.ID
 
 	err = client.StartContainer(d.id, nil)
 	if err != nil {
-		return err
+		return "", err
 	}
+	container, err = client.InspectContainer(d.id)
+	if err != nil {
+		return "", err
+	}
+
+	d.Info(container.NetworkSettings.IPAddress)
+	d.IPaddress = container.NetworkSettings.IPAddress
+
 	d.Info("start container success", "id", d.id)
-	return nil
+	return d.IPaddress, nil
 }
 
 // Stop implements process interface
@@ -164,7 +177,7 @@ type HostProcess struct {
 }
 
 // Start implements process interface
-func (h *HostProcess) Start() error {
+func (h *HostProcess) Start() (string, error) {
 	cmd := h.startcmd
 	cmd.Dir = h.basedir
 	cmd.SysProcAttr = &syscall.SysProcAttr{
@@ -178,11 +191,11 @@ func (h *HostProcess) Start() error {
 	cmd.Stderr = os.Stderr
 
 	if err := cmd.Start(); err != nil {
-		return err
+		return "", err
 	}
 	h.Info("start command success", "pid", cmd.Process.Pid)
 	h.cmd = cmd
-	return nil
+	return "127.0.0.1", nil
 }
 
 func processExists(pid int) bool {

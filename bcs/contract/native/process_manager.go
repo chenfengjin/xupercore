@@ -57,7 +57,7 @@ func (p *processManager) makeProcess(name string, desc *protos.WasmCodeDesc, cod
 		return nil, err
 	}
 
-	err = process.Start()
+	_, err = process.Start()
 	if err != nil {
 		return nil, err
 	}

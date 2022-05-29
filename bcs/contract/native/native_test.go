@@ -38,6 +38,10 @@ var contractConfig = &contract.ContractConfig{
 	Native: contract.NativeConfig{
 		Enable: true,
 		Driver: "native",
+		Docker: contract.NativeDockerConfig{
+			Enable:    true,
+			ImageName: "ubuntu:18.04",
+		},
 	},
 	LogDriver: &MockLogger{
 		log15.New(),
@@ -152,6 +156,7 @@ func TestNativeDocker(t *testing.T) {
 	resp, err := th.Deploy("native", "go", "counter", bin, map[string][]byte{
 		"creator": []byte("icexin"),
 	})
+
 	if err != nil {
 		t.Fatal(err)
 	}
