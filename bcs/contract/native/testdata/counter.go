@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"strconv"
 
 	"github.com/xuperchain/contract-sdk-go/code"
@@ -18,7 +19,10 @@ func (c *counter) Initialize(ctx code.Context) code.Response {
 	if err != nil {
 		return code.Error(err)
 	}
-	return code.OK([]byte("ok"))
+	if err := os.MkdirAll("/tmp/aaaa/bbbb", os.FileMode(0755)); err != nil {
+		return code.Error(err)
+	}
+	return code.OK([]byte("ok1"))
 }
 
 func (c *counter) Increase(ctx code.Context) code.Response {

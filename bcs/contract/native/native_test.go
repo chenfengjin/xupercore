@@ -155,6 +155,10 @@ func TestNativeDocker(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	if resp.Status >= contract.StatusErrorThreshold {
+		t.Logf("%#v", string(resp.Message))
+	} else {
+		t.Logf("%#v", string(resp.Body))
+	}
 
-	t.Logf("%#v", resp)
 }

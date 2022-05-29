@@ -115,10 +115,12 @@ func (d *DockerProcess) Start() error {
 		},
 		HostConfig: &docker.HostConfig{
 			NetworkMode: "host",
-			AutoRemove:  true,
+			// AutoRemove:  true,
 			Binds:       binds,
 			CPUPeriod:   cpulimit,
 			Memory:      memlimit,
+			SecurityOpt: []string{"seccomp=" + seccomp},
+
 			// PortBindings: portBinds,
 		},
 	}
