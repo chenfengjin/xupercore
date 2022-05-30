@@ -146,7 +146,7 @@ func (c *contractProcess) resetRpcClient() error {
 	if err != nil {
 		return err
 	}
-	conn, err := grpc.Dial(fmt.Sprintf("127.0.0.1:%d", port), grpc.WithInsecure())
+	conn, err := grpc.Dial("unix:///home/chenfengjin/xupercore/bcs/contract/native/xchain_code.sock", grpc.WithInsecure())
 	if err != nil {
 		return err
 	}

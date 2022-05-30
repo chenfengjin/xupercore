@@ -42,7 +42,10 @@ func newNativeCreator(cfg *bridge.InstanceCreatorConfig) (bridge.InstanceCreator
 }
 
 func (n *nativeCreator) startRpcServer(service *bridge.SyscallService) (string, error) {
-	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	sockPath := "/home/chenfengjin/xupercore/bcs/contract/native/xchain.sock"
+	// TODO
+	os.Remove(sockPath)
+	listener, err := net.Listen("unix", sockPath)
 	if err != nil {
 		return "", err
 	}
@@ -51,7 +54,9 @@ func (n *nativeCreator) startRpcServer(service *bridge.SyscallService) (string, 
 	pbrpc.RegisterSyscallServer(rpcServer, service)
 	go rpcServer.Serve(listener)
 
-	addr := "tcp://" + listener.Addr().String()
+	addr := "unix://" + listener.Addr().String()
+	// TODO 这里存在资源泄漏
+	// rpcServer.Stop()
 	return addr, nil
 }
 
