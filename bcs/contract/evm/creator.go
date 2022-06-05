@@ -32,7 +32,7 @@ type evmCreator struct {
 }
 
 func newEvmCreator(config *bridge.InstanceCreatorConfig) (bridge.InstanceCreator, error) {
-	opt := evm.Options{}
+	opt := engine.Options{}
 	vm := evm.New(opt)
 	return &evmCreator{
 		vm: vm,
@@ -68,6 +68,9 @@ type evmInstance struct {
 	fromCache  bool
 }
 
+func (e *evmInstance) Print(print *exec.PrintEvent) error {
+	return nil
+}
 func (e *evmInstance) Exec() error {
 	var err error
 
@@ -144,8 +147,8 @@ func (e *evmInstance) Exec() error {
 		Caller:   caller,
 		Callee:   callee,
 		Input:    input,
-		Value:    value,
-		Gas:      &gas,
+		Value:    *value,
+		Gas:      new(big.Int).SetUint64(gas),
 	}
 	out, err := e.vm.Execute(e.state, e.blockState, e, params, e.code)
 	if err != nil {
@@ -160,7 +163,7 @@ func (e *evmInstance) Exec() error {
 		}
 	}
 
-	e.gasUsed = uint64(contract.MaxLimits.Cpu) - *params.Gas
+	e.gasUsed = uint64(contract.MaxLimits.Cpu) - params.Gas.Uint64()
 
 	e.ctx.Output = &pb.Response{
 		Status: 200,
@@ -276,8 +279,8 @@ func (e *evmInstance) deployContract() error {
 		Caller:   caller,
 		Callee:   callee,
 		Input:    input,
-		Value:    big.NewInt(0),
-		Gas:      &gas,
+		Value:    *big.NewInt(0),
+		Gas:      big.NewInt(int64(gas)),
 	}
 	contractCode, err := e.vm.Execute(e.state, e.blockState, e, params, input)
 	if err != nil {
@@ -290,7 +293,7 @@ func (e *evmInstance) deployContract() error {
 		return err
 	}
 
-	e.gasUsed = uint64(contract.MaxLimits.Cpu) - *params.Gas
+	e.gasUsed = uint64(contract.MaxLimits.Cpu) - params.Gas.Uint64()
 
 	e.ctx.Output = &pb.Response{
 		Status: 200,

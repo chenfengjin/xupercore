@@ -112,6 +112,10 @@ type blockStateManager struct {
 	ctx *bridge.Context
 }
 
+func (blockStateManager) ChainID() string {
+	// 	TODO
+	return ""
+}
 func newBlockStateManager(ctx *bridge.Context) *blockStateManager {
 	return &blockStateManager{
 		ctx: ctx,
