@@ -59,5 +59,4 @@ func (x *xvmInterpCreator) RemoveCache(contractName string) {
 
 func init() {
 	bridge.Register(bridge.TypeWasm, "ixvm", newXVMInterpCreator)
-	bridge.Register(bridge.TypeEvm, "ewasm", newXVMInterpCreator)
 }
