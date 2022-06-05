@@ -2,6 +2,7 @@ package leveldb
 
 import (
 	"fmt"
+
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/util"
 	"github.com/xuperchain/xupercore/lib/metrics"
@@ -59,8 +60,8 @@ func (db *LDBDatabase) Open(path string, options map[string]interface{}) error {
 	switch options["storageType"] {
 	case kvdb.StorageTypeSingle:
 		return db.OpenSingle(path, options)
-	case kvdb.StorageTypeMulti:
-		return db.OpenMulti(path, options)
+	// case kvdb.StorageTypeMulti:
+	// 	return db.OpenMulti(path, options)
 	case kvdb.StorageTypeCloud:
 		return db.OpenCloud(path, options)
 	default:

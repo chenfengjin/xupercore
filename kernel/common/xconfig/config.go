@@ -5,9 +5,6 @@ import (
 	"path/filepath"
 
 	"github.com/xuperchain/xupercore/kernel/common/xutils"
-	"github.com/xuperchain/xupercore/lib/utils"
-
-	"github.com/spf13/viper"
 )
 
 type EnvConf struct {
@@ -87,20 +84,20 @@ func (t *EnvConf) GenConfFilePath(fName string) string {
 }
 
 func (t *EnvConf) loadConf(cfgFile string) error {
-	if cfgFile == "" || !utils.FileIsExist(cfgFile) {
-		return fmt.Errorf("config file set error.path:%s", cfgFile)
-	}
-
-	viperObj := viper.New()
-	viperObj.SetConfigFile(cfgFile)
-	err := viperObj.ReadInConfig()
-	if err != nil {
-		return fmt.Errorf("read config failed.path:%s,err:%v", cfgFile, err)
-	}
-
-	if err = viperObj.Unmarshal(t); err != nil {
-		return fmt.Errorf("unmatshal config failed.path:%s,err:%v", cfgFile, err)
-	}
+	// if cfgFile == "" || !utils.FileIsExist(cfgFile) {
+	// 	return fmt.Errorf("config file set error.path:%s", cfgFile)
+	// }
+	//
+	// viperObj := viper.New()
+	// viperObj.SetConfigFile(cfgFile)
+	// err := viperObj.ReadInConfig()
+	// if err != nil {
+	// 	return fmt.Errorf("read config failed.path:%s,err:%v", cfgFile, err)
+	// }
+	//
+	// if err = viperObj.Unmarshal(t); err != nil {
+	// 	return fmt.Errorf("unmatshal config failed.path:%s,err:%v", cfgFile, err)
+	// }
 
 	return nil
 }

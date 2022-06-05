@@ -2,8 +2,6 @@ package config
 
 import (
 	"fmt"
-
-	"github.com/spf13/viper"
 )
 
 // default settings
@@ -93,20 +91,20 @@ func GetDefP2PConf() *NetConf {
 }
 
 func (t *NetConf) loadConf(cfgFile string) error {
-	if cfgFile == "" {
-		return fmt.Errorf("config file set error.path:%s", cfgFile)
-	}
+	// if cfgFile == "" {
+	// 	return fmt.Errorf("config file set error.path:%s", cfgFile)
+	// }
 
-	viperObj := viper.New()
-	viperObj.SetConfigFile(cfgFile)
-	err := viperObj.ReadInConfig()
-	if err != nil {
-		return fmt.Errorf("read config failed.path:%s,err:%v", cfgFile, err)
-	}
+	// viperObj := viper.New()
+	// viperObj.SetConfigFile(cfgFile)
+	// err := viperObj.ReadInConfig()
+	// if err != nil {
+	// 	return fmt.Errorf("read config failed.path:%s,err:%v", cfgFile, err)
+	// }
 
-	if err = viperObj.Unmarshal(t); err != nil {
-		return fmt.Errorf("unmatshal config failed.path:%s,err:%v", cfgFile, err)
-	}
+	// if err = viperObj.Unmarshal(t); err != nil {
+	// 	return fmt.Errorf("unmatshal config failed.path:%s,err:%v", cfgFile, err)
+	// }
 
 	return nil
 }

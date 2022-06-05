@@ -63,26 +63,26 @@ func (c *contractProcess) makeNativeProcess() (Process, error) {
 	if err != nil {
 		return nil, err
 	}
-	if !c.cfg.Docker.Enable {
-		return &HostProcess{
-			basedir:  c.basedir,
-			startcmd: startcmd,
-			envs:     envs,
-			Logger:   c.logger,
-		}, nil
-	}
-	mounts := []string{
-		c.basedir,
-	}
-	return &DockerProcess{
+	// if !c.cfg.Docker.Enable {
+	return &HostProcess{
 		basedir:  c.basedir,
 		startcmd: startcmd,
 		envs:     envs,
-		mounts:   mounts,
-		// ports:    []string{strconv.Itoa(c.rpcPort)},
-		cfg:    &c.cfg.Docker,
-		Logger: c.logger,
+		Logger:   c.logger,
 	}, nil
+	// }
+	// 	mounts := []string{
+	// 		c.basedir,
+	// 	}
+	// 	return &DockerProcess{
+	// 		basedir:  c.basedir,
+	// 		startcmd: startcmd,
+	// 		envs:     envs,
+	// 		mounts:   mounts,
+	// 		// ports:    []string{strconv.Itoa(c.rpcPort)},
+	// 		cfg:    &c.cfg.Docker,
+	// 		Logger: c.logger,
+	// 	}, nil
 }
 
 // wait the subprocess to be ready

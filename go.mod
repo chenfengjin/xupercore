@@ -44,3 +44,6 @@ require (
 )
 
 replace github.com/hyperledger/burrow => github.com/xuperchain/burrow v0.30.6-0.20211229032028-fbee6a05ab0f
+replace github.com/xuperchain/wagon => ../wagon
+
+replace github.com/xuperchain/xvm => ../xvm
