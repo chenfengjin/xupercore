@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strconv"
@@ -163,6 +164,9 @@ func (c *contractProcess) RpcClient() pbrpc.NativeCodeClient {
 }
 
 func (c *contractProcess) restartProcess() error {
+	if os.Getenv("XCHAIN_DEBUG_ENABLE") == "" {
+		return nil
+	}
 	c.process.Stop(time.Second)
 	return c.start(false)
 }

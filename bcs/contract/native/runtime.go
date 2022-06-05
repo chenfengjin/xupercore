@@ -21,7 +21,8 @@ var (
 )
 
 const (
-	pingTimeoutSecond = 2
+	pingTimeoutSecond      = 2
+	pingTimeoutSecondDebug = 300
 )
 
 // Process is the container of running contract
@@ -73,9 +74,13 @@ func (d *DockerProcess) Start() error {
 	}
 	// cmd.Args contains cmd binpath
 	cmd := d.startcmd.Args
+	pingTimeout := pingTimeoutSecond
+	if os.Getenv("XCHAIN_DEBUG_ENABLE") != "" {
+		pingTimeout = pingTimeoutSecondDebug
+	}
 
 	env := []string{
-		"XCHAIN_PING_TIMEOUT=" + strconv.Itoa(pingTimeoutSecond),
+		"XCHAIN_PING_TIMEOUT=" + strconv.Itoa(pingTimeout),
 	}
 	env = append(env, d.envs...)
 
@@ -171,7 +176,11 @@ func (h *HostProcess) Start() error {
 		Setsid: true,
 		Pgid:   0,
 	}
-	cmd.Env = []string{"XCHAIN_PING_TIMEOUT=" + strconv.Itoa(pingTimeoutSecond)}
+
+	cmd.Env = []string{
+		"XCHAIN_PING_TIMEOUT=" + strconv.Itoa(pingTimeoutSecond),
+	}
+
 	cmd.Env = append(cmd.Env, h.envs...)
 	cmd.Env = append(cmd.Env, os.Environ()...)
 	cmd.Stdout = os.Stdout
