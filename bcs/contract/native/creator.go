@@ -43,7 +43,12 @@ func newNativeCreator(cfg *bridge.InstanceCreatorConfig) (bridge.InstanceCreator
 }
 
 func (n *nativeCreator) startRpcServer(service *bridge.SyscallService) (string, error) {
-	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	chainAddr := chainAddrHost
+
+	if n.config.VMConfig.(*contract.NativeConfig).Docker.Enable {
+		chainAddr = chainAddrDocker
+	}
+	listener, err := net.Listen("tcp", fmt.Sprintf("%s:0", chainAddr))
 	if err != nil {
 		return "", err
 	}
@@ -54,10 +59,7 @@ func (n *nativeCreator) startRpcServer(service *bridge.SyscallService) (string, 
 	port := listener.Addr().(*net.TCPAddr).Port
 
 	go rpcServer.Serve(listener)
-	chainAddr := chainAddrHost
-	if n.config.VMConfig.(*contract.NativeConfig).Docker.Enable {
-		chainAddr = chainAddrDocker
-	}
+
 	addr := fmt.Sprintf("tcp://%s:%d", chainAddr, port)
 
 	return addr, nil

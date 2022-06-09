@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	pingTimeoutSecond = 2
+	pingTimeoutSecond = 2000
 )
 
 // Process is the container of running contract

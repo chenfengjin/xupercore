@@ -28,6 +28,7 @@ func (d *DockerProcess) start() error {
 	env = append(env, d.envs...)
 
 	user := strconv.Itoa(os.Getuid()) + ":" + strconv.Itoa(os.Getgid())
+	_ = user
 
 	cpulimit, memlimit, err := d.resourceConfig()
 	if err != nil {
@@ -62,15 +63,16 @@ func (d *DockerProcess) start() error {
 			WorkingDir:   d.basedir,
 			Image:        d.cfg.ImageName,
 			Cmd:          cmd,
-			User:         user,
+			// User:         user,
 		},
 		HostConfig: &docker.HostConfig{
-			NetworkMode:  "bridge",
-			AutoRemove:   true,
+			NetworkMode: "bridge",
+			// AutoRemove:   true,
 			Binds:        binds,
 			CPUPeriod:    cpulimit,
 			Memory:       memlimit,
 			PortBindings: portBinds,
+			// Runtime:      "runsc",
 		},
 	}
 	container, err := client.CreateContainer(opts)

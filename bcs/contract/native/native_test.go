@@ -17,7 +17,7 @@ import (
 const (
 	RUNTIME_DOCKER = "docker"
 	RUNTIME_HOST   = "host"
-	IMAGE_NAME     = "alpine"
+	IMAGE_NAME     = "ubuntu"
 )
 
 func compile(th *mock.TestHelper, runtime string) ([]byte, error) {
@@ -66,13 +66,13 @@ func TestNative(t *testing.T) {
 				t.Skip("docker not available")
 			}
 
-			t.Log("pulling image......")
-			pullResp, errPull := exec.Command("docker", "pull", IMAGE_NAME).CombinedOutput()
-			if errPull != nil {
-				t.Error(err)
-				continue
-				t.Log(string(pullResp))
-			}
+			// t.Log("pulling image......")
+			// pullResp, errPull := exec.Command("docker", "pull", IMAGE_NAME).CombinedOutput()
+			// if errPull != nil {
+			// 	t.Error(err)
+			// 	continue
+			// 	t.Log(string(pullResp))
+			// }
 			contractConfig.Native.Docker.Enable = true
 		} else {
 			contractConfig.Native.Docker.Enable = false
