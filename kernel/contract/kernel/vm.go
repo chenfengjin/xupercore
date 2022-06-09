@@ -70,4 +70,5 @@ func (k *kernInstance) Abort(msg string) {
 
 func init() {
 	bridge.Register("xkernel", "default", newKernvm)
+	bridge.Register("embeded", "default", newKernvm)
 }

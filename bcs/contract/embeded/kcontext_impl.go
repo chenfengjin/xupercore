@@ -1,8 +1,10 @@
-package kernel
+package embeded
 
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"math/big"
 
 	"github.com/xuperchain/xupercore/kernel/contract"
 	"github.com/xuperchain/xupercore/kernel/contract/bridge"
@@ -98,8 +100,13 @@ func (k *kcontextImpl) EmitAsyncTask(event string, args interface{}) (err error)
 	return
 }
 
-func (k *kcontextImpl) TransferAmount() string {
-	return k.ctx.TransferAmount
+func (k *kcontextImpl) TransferAmount() (*big.Int, error) {
+	amount, ok := new(big.Int).SetString(k.ctx.TransferAmount, 10)
+	if !ok {
+		return nil, fmt.Errorf("can not convert %s to big int with base 10", k.ctx.TransferAmount)
+	}
+
+	return amount, nil
 }
 
 func (k *kcontextImpl) ContractName() string {

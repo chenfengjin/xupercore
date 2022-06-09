@@ -36,37 +36,37 @@ var (
 	errNotImplemented = errors.New("not implemented")
 )
 
-// type EVMProxy interface {
-// }
+// func NewEVMProxy(manager contract.Manager) (*EVMProxy, error) {
+// 	registry := manager.GetKernRegistry()
+// 	p := EVMProxy{}
+// 	registry.RegisterKernMethod(CONTRACT_EVM, "SendRawTransaction", p.sendRawTransaction)
+// 	registry.RegisterKernMethod(CONTRACT_EVM, "GetTransactionReceipt", p.getTransactionReceipt)
+// 	registry.RegisterKernMethod(CONTRACT_EVM, "BalanceOf", p.balanceOf)
+// 	registry.RegisterKernMethod(CONTRACT_EVM, "GetTransactionCount", p.transactionCount)
 //
-// type EVMProxy *EVMProxy
-func NewEVMProxy(manager contract.Manager) (*EVMProxy, error) {
-	registry := manager.GetKernRegistry()
-	p := EVMProxy{}
-	registry.RegisterKernMethod(CONTRACT_EVM, "SendRawTransaction", p.sendRawTransaction)
-	registry.RegisterKernMethod(CONTRACT_EVM, "GetTransactionReceipt", p.getTransactionReceipt)
-	registry.RegisterKernMethod(CONTRACT_EVM, "BalanceOf", p.balanceOf)
-	registry.RegisterKernMethod(CONTRACT_EVM, "GetTransactionCount", p.transactionCount)
-
-	// 质压赎回相关
-	registry.RegisterKernMethod(CONTRACT_EVM, "Pledge", p.pledge)
-	registry.RegisterKernMethod(CONTRACT_EVM, "Redeem", p.redeem)
-	registry.RegisterKernMethod(CONTRACT_EVM, "Allowance", p.allowance)
-	return &p, nil
-}
+// 	// 质压赎回相关
+// 	registry.RegisterKernMethod(CONTRACT_EVM, "Pledge", p.pledge)
+// 	registry.RegisterKernMethod(CONTRACT_EVM, "Redeem", p.redeem)
+// 	registry.RegisterKernMethod(CONTRACT_EVM, "Allowance", p.allowance)
+// 	return &p, nil
+// }
 
 type EVMProxyInstaceCreator struct {
+	config map[string]string
 }
 
 func (c *EVMProxy) Enabled() bool {
+	// TODO
 	return false
 }
 
-func (c *EVMProxyInstaceCreator) CreateInstance(configPah string) contract.EmbededContract {
+func (c *EVMProxyInstaceCreator) CreateInstance(configPah string) contract.PrecompiledContract {
 	return &EVMProxy{}
 }
 
 type EVMProxy struct {
+	config     map[string]string
+	PledgeRate uint64
 }
 
 func (p *EVMProxy) sendRawTransaction(ctx contract.KContext) (*contract.Response, error) {
@@ -287,7 +287,6 @@ func (p *EVMProxy) pledge(ctx contract.KContext) (*contract.Response, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	to := ctx.Args()["to"]
 	toByte, err := hex.DecodeString(string(to))
 	if err != nil {
@@ -336,4 +335,13 @@ func (p *EVMProxy) allowance(ctx contract.KContext) (*contract.Response, error) 
 		Status: contract.StatusOK,
 		Body:   balance,
 	}, nil
+}
+func newEVMProxyInstaceCreator(config map[string]string) contract.EmbededContract {
+	return EVMProxy{
+		config: config,
+	}
+}
+
+func init() {
+	contract.RegisterEmbededContractCreatorFunc("ethproxy", newEVMProxyInstaceCreator)
 }

@@ -37,6 +37,8 @@ type EnvConf struct {
 	LedgerConf string `yaml:"ledgerConf,omitempty"`
 	// metric switch
 	MetricSwitch bool `yaml:"metricSwitch,omitempty"`
+	// evm proxy
+	PrecompiledConf string `yaml:"precompiledConf,omitempty"`
 }
 
 func LoadEnvConf(cfgFile string) (*EnvConf, error) {

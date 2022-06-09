@@ -185,7 +185,7 @@ func TestVerifySignature(t *testing.T) {
 		t.Error(err)
 		return
 	}
-	p := &proxy{}
+	p := &EVMProxy{}
 	if err := p.verifySignature(nonce, gasPrice, gasLimit, to, value, data, net, V, S, R); err != nil {
 		t.Error(err)
 		return
@@ -193,7 +193,7 @@ func TestVerifySignature(t *testing.T) {
 }
 
 //  used for debug, *_test.go file will be ignored by golang build system
-func (p *proxy) initialize(ctx contract.KContext) (*contract.Response, error) {
+func (p *EVMProxy) initialize(ctx contract.KContext) (*contract.Response, error) {
 	address := ctx.Args()["address"]
 	addr, err := hex.DecodeString(string(address))
 	if err != nil {

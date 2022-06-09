@@ -76,6 +76,8 @@ type XkernelConfig struct {
 	Registry KernRegistry
 }
 
+type EmbededConfig XkernelConfig
+
 func (x *XkernelConfig) DriverName() string {
 	return x.Driver
 }
